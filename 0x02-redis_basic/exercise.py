@@ -17,10 +17,11 @@ class Cache:
             Callable[[Union[str, bytes, int, float]], str]:
         """ decorator function. """
         @wraps(method)
-        def wrapper(self, data):
+        def wrapper(self, data: Union[str, bytes, int, float]):
             """ wrapper function. """
             self._redis.incr(method.__qualname__, 1)
             method(self, data)
+        wrapper.__qualname__ = method.__qualname__
         return wrapper
 
     @count_calls
