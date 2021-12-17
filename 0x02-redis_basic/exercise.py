@@ -31,7 +31,7 @@ class Cache:
             out_key = "{}:outputs".format(method.__qualname__)
             output = method(self, *args, **kwargs)
             self._redis.rpush(out_key, output)
-            return method(self, *args, **kwargs)
+            return output
         return wraper
 
     @call_history
