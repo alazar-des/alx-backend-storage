@@ -16,3 +16,20 @@ class Cache:
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
+
+    def get(self, key, **fn):
+        """ Reading from Redis and recovering original type. """
+        b_val = self._redis.get(key)
+        if b_val is not None and fn:
+            fn_lst = list(fn.values())
+            if fn_lst[0] is not None:
+                b_val = fn_lst[0](b_val)
+        return b_val
+
+    def get_str(self):
+        """ parameterize to string. """
+        pass
+
+    def get_int(self):
+        """ parameterize to int """
+        pass
