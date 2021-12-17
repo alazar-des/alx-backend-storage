@@ -3,6 +3,7 @@
 from typing import Union, Callable
 import redis
 import uuid
+from functools import wraps
 
 
 class Cache:
@@ -11,15 +12,15 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    def count_calls(method):
+    def count_calls(method:
+                    Callable[[Union[str, bytes, int, float]], str]) -> \
+            Callable[[Union[str, bytes, int, float]], str]:
         """ decorator function. """
+        @wraps(method)
         def wrapper(self, data):
             """ wrapper function. """
-            self._redis.incrby(method.__qualname__, 1)
+            self._redis.incr(method.__qualname__, 1)
             method(self, data)
-        wrapper.__name__ = method.__name__
-        wrapper.__doc__ = method.__doc__
-        wrapper.__qualname__ = method.__qualname__
         return wrapper
 
     @count_calls
