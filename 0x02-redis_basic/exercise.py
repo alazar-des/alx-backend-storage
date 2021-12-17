@@ -51,10 +51,23 @@ class Cache:
                 b_val = fn_lst[0](b_val)
         return b_val
 
-    def get_str(self):
+    def get_str(self, byt):
         """ parameterize to string. """
-        pass
+        return str(byt)
 
-    def get_int(self):
+    def get_int(self, byt):
         """ parameterize to int """
-        pass
+        return int(byt)
+
+    def replay(self, method):
+        """ replay history. """
+        mth_name = method.__qualname__
+        fn_cal = int(self._redis.get(mth_name))
+        ipts = self._redis.lrange("{}:inputs".format(mth_name), 0, -1)
+        opts = self._redis.lrange("{}:outputs".format(mth_name), 0, -1)
+
+        print("{} was called {} times:".format(mth_name, fn_cal))
+        for ipt, opt in zip(ipts, opts):
+            print("{}(*{}) -> {}".format(mth_name,
+                                         ipt.decode('utf-8'),
+                                         opt.decode('utf-8')))
