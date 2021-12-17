@@ -15,12 +15,26 @@ class Cache:
     def count_calls(method: Callable[[any], any]) -> Callable[[any], any]:
         """ decorator function. """
         @wraps(method)
-        def wrapper(self, *args: any, **kwargs: any):
+        def wrapper(self, *args, **kwargs) -> Callable[[any], any]:
             """ wrapper function. """
             self._redis.incr(method.__qualname__)
-            method(self, *args, **kwargs)
+            return method(self, *args, **kwargs)
         return wrapper
 
+    def call_history(method: Callable[[any], any]):
+        """ store input and output of a method. """
+        @wraps(method)
+        def wraper(self, *args, **kwargs) -> Callable[[any], any]:
+            """ wrapper function. """
+            in_key = "{}:inputs".format(method.__qualname__)
+            self._redis.rpush(in_key, str(args))
+            out_key = "{}:outputs".format(method.__qualname__)
+            output = method(self, *args, **kwargs)
+            self._redis.rpush(out_key, output)
+            return method(self, *args, **kwargs)
+        return wraper
+
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ store input data with random uuid4 key. """
