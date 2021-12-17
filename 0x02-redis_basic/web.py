@@ -14,8 +14,11 @@ def catch(method):
     def wrapper(*args, **kwargs):
         """ wrapper function"""
         key = "count:{}".format(args[0])
-        rds.incr(key)
-        rds.expire(key, 10)
+        if not rds.get(key):
+            rds.incr(key)
+            rds.expire(key, 10)
+        else:
+            rds.incr(key)
         return method(*args, **kwargs)
     return wrapper
 
