@@ -12,16 +12,13 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    def count_calls(method:
-                    Callable[[Union[str, bytes, int, float]], str]) -> \
-            Callable[[Union[str, bytes, int, float]], str]:
+    def count_calls(method: Callable[[any], any]) -> Callable[[any], any]:
         """ decorator function. """
         @wraps(method)
-        def wrapper(self, data: Union[str, bytes, int, float]):
+        def wrapper(self, *args: any, **kwargs: any):
             """ wrapper function. """
-            self._redis.incr(method.__qualname__, 1)
-            method(self, data)
-        wrapper.__qualname__ = method.__qualname__
+            self._redis.incr(method.__qualname__)
+            method(self, *args, **kwargs)
         return wrapper
 
     @count_calls
