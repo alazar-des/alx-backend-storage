@@ -11,6 +11,18 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    def count_calls(method):
+        """ decorator function. """
+        def wrapper(self, data):
+            """ wrapper function. """
+            self._redis.incrby(method.__qualname__, 1)
+            method(self, data)
+        wrapper.__name__ = method.__name__
+        wrapper.__doc__ = method.__doc__
+        wrapper.__qualname__ = method.__qualname__
+        return wrapper
+
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ store input data with random uuid4 key. """
         key = str(uuid.uuid4())
